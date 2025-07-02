@@ -44,4 +44,17 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function run(): void
+    {
+        User::factory()
+            ->count(50)
+            ->hasPosts(1)
+            ->create();
+    }
+
+    public function todos(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Todo::class);
+    }
 }

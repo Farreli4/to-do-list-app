@@ -18,6 +18,7 @@ class Todo extends Model
     protected $fillable = [
         'title',
         'description',
+        'due_date',
         'is_completed',
         'user_id',
     ];
@@ -29,6 +30,7 @@ class Todo extends Model
      */
     protected $casts = [
         'is_completed' => 'boolean',
+        'due_date' => 'date',
     ];
 
     /**

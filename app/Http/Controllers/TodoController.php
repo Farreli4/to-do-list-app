@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Todo;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class TodoController extends Controller
 {
@@ -18,7 +17,6 @@ class TodoController extends Controller
         $completed_todos = $todos->where('is_completed', true)->count();
         $remaining_todos = $total_todos - $completed_todos;
 
-        // Kirim semua data ke view
         return view('todos.index', [
             'todos' => $todos,
             'total_todos' => $total_todos,
@@ -27,73 +25,58 @@ class TodoController extends Controller
         ]);
     }
 
-
     public function store(Request $request)
     {
         $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'due_date' => 'nullable|date', // <-- TAMBAHKAN VALIDASI
         ]);
 
         auth()->user()->todos()->create([
             'title' => $request->title,
             'description' => $request->description,
+            'due_date' => $request->due_date, // <-- TAMBAHKAN FIELD
+            'is_completed' => false,
         ]);
 
-        return back()->with('success', 'Tugas berhasil ditambahkan!');
+        return redirect()->route('todos.index')->with('success', 'Tugas berhasil ditambahkan!');
     }
 
     public function update(Todo $todo)
     {
-        if (auth()->user()->id !== $todo->user_id) {
-            abort(403);
-        }
-
+        if (auth()->user()->id !== $todo->user_id) { abort(403); }
         $todo->update(['is_completed' => !$todo->is_completed]);
-
-        return back()->with('success', 'Status tugas berhasil diperbarui!');
+        return redirect()->route('todos.index')->with('success', 'Status tugas berhasil diperbarui!');
     }
 
     public function destroy(Todo $todo)
     {
-        if (auth()->user()->id !== $todo->user_id) {
-            abort(403);
-        }
-
+        if (auth()->user()->id !== $todo->user_id) { abort(403); }
         $todo->delete();
-
-        return back()->with('success', 'Tugas berhasil dihapus!');
+        return redirect()->route('todos.index')->with('success', 'Tugas berhasil dihapus!');
     }
 
     public function edit(Todo $todo)
     {
-        // Pastikan user hanya bisa mengedit todo miliknya sendiri
-        if (auth()->user()->id !== $todo->user_id) {
-            abort(403);
-        }
-
+        if (auth()->user()->id !== $todo->user_id) { abort(403); }
         return view('todos.edit', ['todo' => $todo]);
     }
 
-    /**
-     * Mengupdate data tugas di database.
-     */
     public function updateData(Request $request, Todo $todo)
     {
-        if (auth()->user()->id !== $todo->user_id) {
-            abort(403);
-        }
+        if (auth()->user()->id !== $todo->user_id) { abort(403); }
 
-        // Validasi input
         $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'due_date' => 'nullable|date', // <-- TAMBAHKAN VALIDASI
         ]);
 
-        // Update data
         $todo->update([
             'title' => $request->title,
             'description' => $request->description,
+            'due_date' => $request->due_date, // <-- TAMBAHKAN FIELD
         ]);
 
         return redirect()->route('todos.index')->with('success', 'Tugas berhasil diperbarui!');

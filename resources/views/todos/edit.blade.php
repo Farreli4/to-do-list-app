@@ -6,14 +6,21 @@
 
                 <form action="{{ route('todos.updateData', $todo) }}" method="POST" class="space-y-4">
                     @csrf
-                    @method('PUT') <div>
+                    @method('PUT')
+
+                    <div>
                         <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Judul Tugas</label>
-                        <input type="text" id="title" name="title" value="{{ $todo->title }}" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 transition duration-300" required>
+                        <input type="text" id="title" name="title" value="{{ old('title', $todo->title) }}" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 transition duration-300" required>
                     </div>
 
                     <div>
                         <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
-                        <textarea id="description" name="description" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 transition duration-300" rows="4">{{ $todo->description }}</textarea>
+                        <textarea id="description" name="description" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 transition duration-300" rows="4">{{ old('description', $todo->description) }}</textarea>
+                    </div>
+
+                    <div>
+                        <label for="due_date" class="block text-sm font-medium text-gray-700 mb-1">Deadline</label>
+                        <input type="date" id="due_date" name="due_date" value="{{ old('due_date', $todo->due_date ? $todo->due_date->format('Y-m-d') : '') }}" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 transition duration-300">
                     </div>
 
                     <div class="flex items-center justify-end gap-4 pt-4">

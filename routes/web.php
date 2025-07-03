@@ -25,4 +25,5 @@ Route::patch('/todos/{todo}', [TodoController::class, 'update'])->name('todos.up
 Route::delete('/todos/{todo}', [TodoController::class, 'destroy'])->name('todos.destroy');
 Route::get('/todos/{todo}/edit', [TodoController::class, 'edit'])->name('todos.edit');
 Route::put('/todos/{todo}', [TodoController::class, 'updateData'])->name('todos.updateData');
+
 require __DIR__.'/auth.php';

@@ -11,14 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('todos', function (Blueprint $table) {
-            $table->id();
-            $table->string('title');
-            $table->text('description')->nullable();
+        Schema::table('todos', function (Blueprint $table) {
+            //
             $table->date('due_date')->nullable()->after('description');
-            $table->boolean('is_completed')->default(false);
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->timestamps();
         });
     }
 
@@ -27,6 +22,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('todos');
+        Schema::table('todos', function (Blueprint $table) {
+            //
+            $table->dropColumn('due_date');
+        });
     }
 };

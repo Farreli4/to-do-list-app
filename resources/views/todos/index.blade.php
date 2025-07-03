@@ -11,7 +11,10 @@
             <div class="bg-white p-4 rounded-2xl shadow-md mb-8">
                 <form action="{{ route('todos.store') }}" method="POST" class="space-y-4">
                     @csrf
-                    <input type="text" name="title" placeholder="Judul Tugas..." class="w-full px-4 py-3 border-0 rounded-xl bg-gray-50 focus:ring-2 focus:ring-blue-500 transition duration-300" required>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <input type="text" name="title" placeholder="Judul Tugas..." class="w-full px-4 py-3 border-0 rounded-xl bg-gray-50 focus:ring-2 focus:ring-blue-500 transition duration-300" required>
+                        <input type="date" name="due_date" title="Tanggal Deadline" class="w-full px-4 py-3 border-0 rounded-xl bg-gray-50 focus:ring-2 focus:ring-blue-500 transition duration-300">
+                    </div>
                     <textarea name="description" placeholder="Deskripsi singkat (opsional)..." class="w-full px-4 py-3 border-0 rounded-xl bg-gray-50 focus:ring-2 focus:ring-blue-500 transition duration-300" rows="2"></textarea>
                     <div class="text-right">
                         <button type="submit" class="bg-blue-600 text-white font-semibold px-6 py-3 rounded-xl hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-300">
@@ -28,7 +31,6 @@
             @endif
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-
                 <div>
                     <h2 class="text-xl font-bold text-black mb-4">Tugas Tersisa</h2>
                     <div class="space-y-4">
@@ -43,34 +45,44 @@
                                     @if($todo->description)
                                         <p class="text-sm text-gray-500 mt-1">{{ $todo->description }}</p>
                                     @endif
+
+                                    @if($todo->due_date)
+                                        @php
+                                            $isOverdue = $todo->due_date->isPast() && !$todo->is_completed;
+                                            $isToday = $todo->due_date->isToday();
+                                        @endphp
+                                        <div class="flex items-center text-sm mt-2
+                                            @if($isOverdue) text-red-500 font-semibold
+                                            @elseif($isToday && !$todo->is_completed) text-orange-500 font-semibold
+                                            @else text-gray-400
+                                            @endif">
+
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+
+                                            <span>
+                                                @if($isOverdue)
+                                                    Terlambat {{ $todo->due_date->diffForHumans(null, true) }}
+                                                @elseif($isToday && !$todo->is_completed)
+                                                    Deadline Hari Ini
+                                                @else
+                                                    Deadline {{ $todo->due_date->diffForHumans() }}
+                                                @endif
+                                                ({{ $todo->due_date->format('d M Y') }})
+                                            </span>
+                                        </div>
+                                    @endif
                                 </div>
                                 <div class="flex items-center ml-auto pl-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                    <a href="{{ route('todos.edit', $todo) }}" class="text-gray-400 hover:text-blue-500 mr-2" title="Edit Tugas">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-                                    </a>
-                                    <form action="{{ route('todos.update', $todo) }}" method="POST" class="mr-2">
-                                        @csrf @method('PATCH')
-                                        <button type="submit" class="text-gray-400 hover:text-green-500" title="Selesaikan Tugas">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-                                        </button>
-                                    </form>
-                                    <form action="{{ route('todos.destroy', $todo) }}" method="POST" onsubmit="return confirm('Yakin ingin hapus tugas ini?');">
-                                        @csrf @method('DELETE')
-                                        <button type="submit" class="text-gray-400 hover:text-red-500" title="Hapus Tugas">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                                        </button>
-                                    </form>
+                                    <a href="{{ route('todos.edit', $todo) }}" class="text-gray-400 hover:text-blue-500 mr-2" title="Edit Tugas"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg></a>
+                                    <form action="{{ route('todos.update', $todo) }}" method="POST" class="mr-2">@csrf @method('PATCH')<button type="submit" class="text-gray-400 hover:text-green-500" title="Selesaikan Tugas"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg></button></form>
+                                    <form action="{{ route('todos.destroy', $todo) }}" method="POST" onsubmit="return confirm('Yakin ingin hapus tugas ini?');">@csrf @method('DELETE')<button type="submit" class="text-gray-400 hover:text-red-500" title="Hapus Tugas"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button></form>
                                 </div>
                             </div>
                         @empty
-                            <div class="bg-white text-center p-8 rounded-2xl shadow-md border-2 border-dashed border-gray-200">
-                                <svg class="mx-auto h-12 w-12 text-gray-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14.25 9.75L16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z" /></svg>
-                                <h3 class="mt-2 text-sm font-medium text-gray-900">Hebat!</h3><p class="mt-1 text-sm text-gray-500">Tidak ada tugas yang tersisa.</p>
-                            </div>
+                            <div class="bg-white text-center p-8 rounded-2xl shadow-md border-2 border-dashed border-gray-200"><svg class="mx-auto h-12 w-12 text-gray-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14.25 9.75L16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z" /></svg><h3 class="mt-2 text-sm font-medium text-gray-900">Hebat!</h3><p class="mt-1 text-sm text-gray-500">Tidak ada tugas yang tersisa.</p></div>
                         @endforelse
                     </div>
                 </div>
-
                 <div>
                     <h2 class="text-xl font-bold text-black mb-4">Tugas Selesai</h2>
                     <div class="space-y-4">
@@ -87,23 +99,14 @@
                                     @endif
                                 </div>
                                 <div class="flex items-center ml-auto pl-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                    <form action="{{ route('todos.destroy', $todo) }}" method="POST" onsubmit="return confirm('Yakin ingin hapus tugas ini?');">
-                                        @csrf @method('DELETE')
-                                        <button type="submit" class="text-gray-400 hover:text-red-500" title="Hapus Tugas">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                                        </button>
-                                    </form>
+                                    <form action="{{ route('todos.destroy', $todo) }}" method="POST" onsubmit="return confirm('Yakin ingin hapus tugas ini?');">@csrf @method('DELETE')<button type="submit" class="text-gray-400 hover:text-red-500" title="Hapus Tugas"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button></form>
                                 </div>
                             </div>
                         @empty
-                            <div class="bg-white text-center p-8 rounded-2xl shadow-md border-2 border-dashed border-gray-200">
-                                <svg class="mx-auto h-12 w-12 text-gray-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0l-.07.002z" /></svg>
-                                <h3 class="mt-2 text-sm font-medium text-gray-900">Belum ada tugas selesai</h3><p class="mt-1 text-sm text-gray-500">Ayo selesaikan beberapa tugas!</p>
-                            </div>
+                            <div class="bg-white text-center p-8 rounded-2xl shadow-md border-2 border-dashed border-gray-200"><svg class="mx-auto h-12 w-12 text-gray-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0l-.07.002z" /></svg><h3 class="mt-2 text-sm font-medium text-gray-900">Belum ada tugas selesai</h3><p class="mt-1 text-sm text-gray-500">Ayo selesaikan beberapa tugas!</p></div>
                         @endforelse
                     </div>
                 </div>
-
             </div>
         </div>
     </div>

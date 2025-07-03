@@ -8,11 +8,8 @@ Route::get('/', function () {
     return view('landing_page');
 });
 
-//Route::get('/dashboard', function () {
-//    return view('todos.index');
-//})->middleware(['auth', 'verified'])->name('dashboard');
 
-// --- MENJADI SEPERTI INI ---
+
 Route::get('/dashboard', [TodoController::class, 'index'])
     ->middleware(['auth', 'verified'])->name('dashboard');
 
